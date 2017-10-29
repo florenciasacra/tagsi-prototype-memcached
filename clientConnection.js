@@ -23,10 +23,7 @@ var connection = mysql.createConnection({
  */
 var Memcached = require('memcached');
 var md5 = require('md5');
-var fb = require('node-firebird');
-var async = require('async');
 var await = require('await');
-var wait=require('wait.for');
 
 //all global configurations should be applied to the .config object of the Client.
 var memcached = new Memcached('localhost:11211');
@@ -37,20 +34,11 @@ var querykey = 'KEY' + md5(query);
 
 var result = undefined;
 
-function findResult(){
-	memcached.get(querykey, function (err, data) {
-		  return data;
-	})
-}
-
-result = await (memcached.get(querykey, function (err, data) {
-	  console.log('get memcached Primero '+ data);
-	  return data;
+// Verify if exist querykey in memcached
+await (memcached.get(querykey, function (err, data) {
+	result = data;
 }));
 
-
-console.log('querykey ' + querykey);
-console.log('result despues de get ' + result);
 
 if (result) {
 	console.log("<p>Data was: " + result + "</p>");
@@ -80,7 +68,6 @@ if (result) {
 	    					
 	    					// get profile key data
 	    					result = await(memcached.get(querykey, function (err, data) {
-	    					  console.log('get memcached '+ data);
 	    					  return data;
 	    					}));
 	    					
