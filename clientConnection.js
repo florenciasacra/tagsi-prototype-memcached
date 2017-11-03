@@ -33,7 +33,7 @@ var query = "SELECT LastName FROM foo WHERE PersonID = 1";
 var querykey = 'KEY' + md5(query);
 
 var result = undefined;
-
+var pre_query = new Date().getTime();
 // Verify if exist querykey in memcached
 await (memcached.get(querykey, function (err, data) {
 	result = data;
@@ -41,10 +41,17 @@ await (memcached.get(querykey, function (err, data) {
 
 
 if (result) {
+	// get a timestamp after running the query
+	var post_memcached = new Date().getTime();
+	// calculate the duration in seconds
+	var durationMemcached = (post_memcached - pre_query) / 1000;
+	console.log("Duration Memcached: " + durationMemcached);
+	      
 	console.log("<p>Data was: " + result + "</p>");
 	console.log("<p>Caching success!</p><p>Retrieved data from memcached!</p>");
 } else {
 		var rows;
+		pre_query = new Date().getTime();
 		connection.connect(function(connectionError){
 		    	  if(connectionError){
 	    		    throw connectionError;
@@ -53,6 +60,12 @@ if (result) {
 	    		  connection.query(query, function (err, rows, fields) {
 	    		        if (err) throw err;
 	    		        connection.end();// mysql disconnect
+	    		        
+  	    		      // get a timestamp after running the query
+  	    		      var post_query = new Date().getTime();
+  	    		      // calculate the duration in seconds
+  	    		      var durationMySql = (post_query - pre_query) / 1000;
+  	    		      console.log("Duration Query Mysql: " + durationMySql);
 	    		        
 	    		        var LastName = '';
 	    			    for(var k in rows) {
